@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#07060d">
+  <meta name="description" content="Aurora Digital — tienda de productos digitales personalizados.">
+  <title>Aurora Digital</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    :root{
+      --bg:#07060d;
+      --bg-soft:#0e0b1d;
+      --surface:rgba(17,14,34,.82);
+      --surface-strong:#121026;
+      --ink:#f4f7ff;
+      --soft:#acaec9;
+      --muted:#747797;
+      --line:rgba(255,255,255,.09);
+      --blue:#5b7cff;
+      --blue-strong:#3f5df1;
+      --cyan:#5ad1ff;
+      --violet:#9a8cff;
+      --pink:#8f86ff;
+      --pink-strong:#9a8cff;
+      --gold:#ffd7a1;
+      --green:#72e0b0;
+      --shadow:0 20px 60px rgba(19,30,101,.28);
+      --shadow-hover:0 26px 76px rgba(34,53,150,.38);
+      --grad:linear-gradient(120deg,#cfd3ff 0%,#8f86ff 34%,#5b7cff 65%,#5ad1ff 100%);
+      --radius:24px;
+      --max:1180px;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      min-height:100vh;
+      color:var(--ink);
+      font-family:'Inter',system-ui,sans-serif;
+      background:
+        radial-gradient(circle at 10% 0%,rgba(83,76,214,.17),transparent 29%),
+        radial-gradient(circle at 92% 12%,rgba(40,154,205,.11),transparent 27%),
+        linear-gradient(180deg,#07060d 0%,#05040a 100%);
+      -webkit-font-smoothing:antialiased;
+      -webkit-text-size-adjust:100%;
+      overflow-x:hidden;
+    }
+    body.modal-open{overflow:hidden}
+    a{color:inherit;text-decoration:none}
+    button,input{font:inherit}
+    button{border:0;cursor:pointer}
+    img{display:block;max-width:100%}
+    ::selection{background:rgba(83,108,255,.24)}
+
+    #canvas{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:0;
+      pointer-events:none;
+      opacity:.72;
+    }
+    .ambient{
+      position:fixed;
+      inset:0;
+      z-index:1;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .ambient span{
+      position:absolute;
+      display:block;
+      border-radius:50%;
+      filter:blur(85px);
+      opacity:.32;
+    }
+    .ambient .a{
+      width:420px;height:420px;
+      left:-120px;top:-120px;
+      background:#5b6df6;
+      animation:floatA 18s ease-in-out infinite alternate;
+    }
+    .ambient .b{
+      width:420px;height:420px;
+      right:-150px;top:18%;
+      background:#3e93db;
+      animation:floatB 22s ease-in-out infinite alternate;
+    }
+    .ambient .c{
+      width:360px;height:360px;
+      left:35%;bottom:-160px;
+      background:#6647c8;
+      animation:floatC 24s ease-in-out infinite alternate;
+    }
+    @keyframes floatA{to{transform:translate(80px,55px) scale(1.08)}}
+    @keyframes floatB{to{transform:translate(-65px,60px) scale(1.10)}}
+    @keyframes floatC{to{transform:translate(35px,-45px) scale(1.08)}}
+
+    .page{position:relative;z-index:5}
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:80;
+      background:rgba(7,6,13,.68);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+      border-bottom:1px solid transparent;
+      transition:.25s ease;
+    }
+    header.scrolled{
+      border-color:var(--line);
+      box-shadow:0 8px 30px rgba(77,48,73,.06);
+    }
+    .nav{
+      width:min(var(--max),calc(100% - 32px));
+      min-height:72px;
+      margin:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:11px;
+      min-width:0;
+    }
+    .brand-mark{
+      width:33px;
+      height:33px;
+      flex:0 0 auto;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:conic-gradient(from 210deg,#7d8cff,#5b7cff,#8f86ff,#566cff,#7d8cff);
+      box-shadow:0 10px 28px rgba(83,108,255,.30);
+    }
+    .brand-mark::after{
+      content:"";
+      width:13px;
+      height:13px;
+      border-radius:50%;
+      background:var(--bg);
+    }
+    .brand-name{
+      font:600 24px/1 'Cormorant Garamond',serif;
+      letter-spacing:.01em;
+      white-space:nowrap;
+    }
+    .nav-actions{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .nav-btn{
+      min-height:40px;
+      padding:0 14px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.045);
+      color:var(--soft);
+      font-size:12px;
+      font-weight:700;
+      transition:.22s ease;
+    }
+    .nav-btn:hover{
+      color:var(--ink);
+      border-color:rgba(217,106,161,.34);
+      background:#121026;
+      transform:translateY(-1px);
+    }
+    .nav-btn.whatsapp i{color:#22a85f}
+    .nav-btn.profile i{color:var(--pink-strong)}
+
+    .hero{
+      padding:68px 0 26px;
+    }
+    .wrap{
+      width:min(var(--max),calc(100% - 32px));
+      margin:auto;
+    }
+    .hero-top{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:30px;
+      margin-bottom:26px;
+    }
+    .hero-copy{max-width:760px}
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      color:var(--muted);
+      font-size:10px;
+      font-weight:800;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+    }
+    .eyebrow::before{
+      content:"";
+      width:24px;
+      height:1px;
+      background:var(--pink);
+    }
+    h1{
+      margin-top:13px;
+      font:600 clamp(48px,7vw,82px)/.93 'Cormorant Garamond',serif;
+      letter-spacing:-.025em;
+    }
+    h1 em{
+      font-style:italic;
+      background:var(--grad);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+    .hero-desc{
+      max-width:690px;
+      margin-top:15px;
+      color:var(--soft);
+      font-size:14px;
+      line-height:1.75;
+    }
+    .count-badge{
+      flex:0 0 auto;
+      padding:11px 14px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,255,255,.72);
+      color:var(--soft);
+      font-size:11px;
+      box-shadow:0 8px 24px rgba(79,42,77,.06);
+    }
+    .count-badge b{color:var(--ink)}
+
+    .toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+    }
+    .search{
+      width:min(480px,100%);
+      min-height:46px;
+      display:flex;
+      align-items:center;
+      gap:9px;
+      padding:0 14px;
+      border:1px solid var(--line);
+      border-radius:15px;
+      background:rgba(255,255,255,.78);
+      box-shadow:0 10px 24px rgba(79,42,77,.05);
+    }
+    .search i{color:var(--muted);font-size:12px}
+    .search input{
+      width:100%;
+      border:0;
+      outline:0;
+      color:var(--ink);
+      background:transparent;
+      font-size:16px; /* 16px evita el zoom automático de iPhone/iPad al tocar el buscador */
+    }
+    .search input::placeholder{color:var(--muted)}
+    .secure{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:var(--muted);
+      font-size:10.5px;
+      white-space:nowrap;
+    }
+    .secure i{color:#22a85f}
+
+    .catalog{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:16px;
+      padding-bottom:58px;
+    }
+    .card{
+      min-width:0;
+      overflow:hidden;
+      border-radius:21px;
+      border:1px solid var(--line);
+      background:linear-gradient(160deg,rgba(18,16,38,.90),rgba(10,9,23,.88));
+      box-shadow:var(--shadow);
+      transition:transform .27s ease,box-shadow .27s ease,border-color .27s ease;
+    }
+    .card:hover{
+      transform:translateY(-5px);
+      border-color:rgba(217,106,161,.24);
+      box-shadow:var(--shadow-hover);
+    }
+    .media{
+      position:relative;
+      overflow:hidden;
+      aspect-ratio:1.08/1;
+      background:linear-gradient(145deg,#17143b,#10102b);
+    }
+    .media img{
+      position:relative;
+      z-index:1;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transition:transform .45s ease;
+    }
+    .ph{
+      position:absolute;
+      inset:0;
+      z-index:0;
+      display:grid;
+      place-items:center;
+      color:rgba(154,140,255,.5);
+      font-size:34px;
+      background:radial-gradient(circle at 35% 30%,rgba(91,124,255,.22),transparent 60%),linear-gradient(145deg,#17143b,#10102b);
+    }
+    .card:hover .media img{transform:scale(1.045)}
+    .media::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:2;
+      background:linear-gradient(180deg,transparent 55%,rgba(36,22,39,.12));
+      pointer-events:none;
+    }
+    .tag{
+      position:absolute;
+      left:9px;
+      top:9px;
+      z-index:3;
+      min-height:24px;
+      padding:0 9px;
+      display:flex;
+      align-items:center;
+      border-radius:999px;
+      background:linear-gradient(160deg,rgba(18,16,38,.90),rgba(10,9,23,.88));
+      border:1px solid rgba(120,140,255,.18);
+      color:var(--soft);
+      font-size:9px;
+      font-weight:800;
+      box-shadow:0 7px 20px rgba(14,24,68,.24);
+    }
+    .body{
+      padding:14px;
+    }
+    .seller{
+      color:var(--muted);
+      font-size:8.5px;
+      margin-bottom:5px;
+    }
+    .title{
+      font-size:14px;
+      line-height:1.24;
+      font-weight:800;
+      margin-bottom:7px;
+      overflow-wrap:anywhere;
+    }
+    .desc{
+      color:var(--soft);
+      font-size:10.5px;
+      line-height:1.45;
+      min-height:45px;
+      display:-webkit-box;
+      -webkit-line-clamp:3;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    .price-line{
+      margin-top:11px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .price{
+      font:600 27px/1 'Cormorant Garamond',serif;
+    }
+    .price small{
+      font:700 8px 'Inter',sans-serif;
+      letter-spacing:.08em;
+      color:var(--muted);
+      margin-left:3px;
+    }
+    .pay-status{
+      color:var(--muted);
+      text-align:right;
+      font-size:8px;
+      line-height:1.3;
+    }
+    .actions{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:7px;
+      margin-top:11px;
+    }
+    .buy-btn,.detail-btn{
+      min-height:44px;
+      border-radius:11px;
+      text-align:center;
+      line-height:1.2;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      font-size:10px;
+      font-weight:800;
+      transition:.22s ease;
+    }
+    .buy-btn{
+      color:#08101e;
+      background:var(--grad);
+      box-shadow:0 8px 18px rgba(73,94,255,.24);
+    }
+    .buy-btn i{font-size:13px}
+    .buy-btn:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(73,94,255,.34)}
+    .detail-btn{
+      color:var(--soft);
+      border:1px solid var(--line);
+      background:#121026;
+    }
+    .detail-btn:hover{
+      color:var(--ink);
+      border-color:rgba(73,94,255,.34);
+    }
+
+    .empty{
+      grid-column:1/-1;
+      min-height:180px;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:30px;
+      border:1px dashed rgba(103,124,255,.16);
+      border-radius:21px;
+      color:var(--muted);
+      font-size:12px;
+      background:rgba(255,255,255,.48);
+    }
+    .empty strong{
+      display:block;
+      color:var(--ink);
+      font-size:15px;
+      margin-bottom:6px;
+    }
+
+    .features{
+      padding:10px 0 72px;
+    }
+    .feature-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:13px;
+    }
+    .feature{
+      padding:22px;
+      border-radius:20px;
+      background:linear-gradient(160deg,rgba(18,16,38,.72),rgba(10,9,23,.62));
+      border:1px solid var(--line);
+      transition:.25s ease;
+    }
+    .feature:hover{
+      transform:translateY(-4px);
+      background:#121026;
+      box-shadow:var(--shadow);
+    }
+    .feature-num{
+      font:600 32px/1 'Cormorant Garamond',serif;
+      background:var(--grad);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+    .feature h3{font-size:13px;margin:9px 0 5px}
+    .feature p{font-size:11px;color:var(--soft);line-height:1.6}
+
+    footer{
+      border-top:1px solid var(--line);
+      padding:24px 0 28px;
+      background:rgba(8,7,15,.46);
+    }
+    .footer{
+      width:min(var(--max),calc(100% - 32px));
+      margin:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:11px;
+    }
+    .footer-links{display:flex;gap:16px;flex-wrap:wrap}
+    .footer-links button{background:none;color:var(--muted)}
+    .footer-links button:hover{color:var(--ink)}
+
+    .modal-layer{
+      position:fixed;
+      inset:0;
+      z-index:200;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(2,4,14,.68);
+      backdrop-filter:blur(13px);
+      -webkit-backdrop-filter:blur(13px);
+    }
+    .modal-layer.show{display:flex}
+    .modal{
+      width:min(520px,100%);
+      max-height:min(82vh,700px);
+      overflow:auto;
+      border-radius:24px;
+      background:#121026;
+      border:1px solid rgba(53,37,60,.10);
+      box-shadow:0 35px 90px rgba(14,19,56,.58);
+      animation:modalIn .22s ease;
+    }
+    @keyframes modalIn{
+      from{opacity:0;transform:translateY(10px) scale(.98)}
+      to{opacity:1;transform:none}
+    }
+    .modal-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      padding:17px 19px;
+      border-bottom:1px solid var(--line);
+    }
+    .modal-head h3{
+      font:600 27px/1 'Cormorant Garamond',serif;
+    }
+    .close{
+      width:35px;height:35px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:#121026;
+      color:var(--soft);
+    }
+    .close:hover{color:var(--ink)}
+    .modal-body{padding:19px}
+    .modal-body p,.modal-body li{
+      font-size:13px;
+      line-height:1.72;
+      color:var(--soft);
+    }
+    .modal-body p{margin-bottom:10px}
+    .modal-body ul{padding-left:17px}
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:calc(22px + env(safe-area-inset-bottom));
+      z-index:240;
+      max-width:min(92vw,540px);
+      padding:12px 17px;
+      border-radius:999px;
+      background:#2b2031;
+      color:#fff;
+      font-size:11px;
+      text-align:center;
+      transform:translate(-50%,16px);
+      opacity:0;
+      pointer-events:none;
+      transition:.25s ease;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translate(-50%,0);
+    }
+
+    @media (max-width:1050px){
+      .catalog{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .hero-top{align-items:flex-start;flex-direction:column}
+    }
+    @media (max-width:760px){
+      .nav-btn span{display:none}
+      .nav-btn{width:40px;padding:0}
+      .hero{padding-top:44px}
+      .toolbar{align-items:stretch;flex-direction:column}
+      .search{width:100%}
+      .secure{justify-content:center}
+      .catalog{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .feature-grid{grid-template-columns:1fr}
+    }
+    @media (max-width:460px){
+      .wrap,.nav,.footer{width:calc(100% - 18px)}
+      .body{padding:11px}
+      .seller{font-size:10px}
+      .title{font-size:13px}
+      .desc{font-size:11px;min-height:48px}
+      .price{font-size:24px}
+      .price small{font-size:9px}
+      .pay-status{font-size:9.5px}
+      .buy-btn{min-height:44px;font-size:11px}
+      .footer{justify-content:center;text-align:center;font-size:12px}
+      .footer-links{justify-content:center}
+    }
+    /* En pantallas táctiles no se queda "pegado" el efecto al tocar */
+    @media (hover:none){
+      .card:hover{transform:none;box-shadow:var(--shadow)}
+      .card:hover .media img{transform:none}
+      .buy-btn:hover{transform:none}
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas" aria-hidden="true"></canvas>
+
+  <div class="ambient" aria-hidden="true">
+    <span class="a"></span>
+    <span class="b"></span>
+    <span class="c"></span>
+  </div>
+
+  <div class="page">
+    <header id="header">
+      <div class="nav">
+        <a class="brand" href="#inicio" aria-label="Inicio">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-name" id="storeName">Aurora Digital</span>
+        </a>
+
+        <div class="nav-actions">
+          <button class="nav-btn profile" type="button" onclick="openInfo('about')">
+            <i class="fa-regular fa-user"></i>
+            <span>Perfil</span>
+          </button>
+          <button class="nav-btn whatsapp" type="button" onclick="askWhatsApp()">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span>WhatsApp</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="inicio">
+      <section class="hero">
+        <div class="wrap">
+          <div class="hero-top">
+            <div class="hero-copy">
+              <div class="eyebrow">Colección digital</div>
+              <h1>
+                Experiencias que brillan <em>diferente</em>
+              </h1>
+              <p class="hero-desc">
+                Explora nuestros productos digitales personalizados. Elige el que te guste y haz tu pedido directo por WhatsApp.
+              </p>
+            </div>
+
+            <div class="count-badge">
+              <b id="count">0</b> productos disponibles
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <label class="search" for="search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input id="search" type="search" placeholder="Buscar producto..." autocomplete="off">
+            </label>
+
+            <div class="secure">
+              <i class="fa-brands fa-whatsapp"></i>
+              Atención directa por WhatsApp
+            </div>
+          </div>
+
+          <section class="catalog" id="catalog" aria-live="polite"></section>
+        </div>
+      </section>
+
+      <section class="features">
+        <div class="wrap feature-grid">
+          <article class="feature">
+            <div class="feature-num">01</div>
+            <h3>Compra directa</h3>
+            <p>Cada producto abre tu chat de WhatsApp con el pedido ya escrito.</p>
+          </article>
+
+          <article class="feature">
+            <div class="feature-num">02</div>
+            <h3>Personalización</h3>
+            <p>Puedes pedir nombres, frases y detalles para hacerlo tuyo.</p>
+          </article>
+
+          <article class="feature">
+            <div class="feature-num">03</div>
+            <h3>Entrega digital</h3>
+            <p>Recibe tu producto por medios digitales una vez confirmado el pedido.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer">
+        <span>© <span id="year"></span> <span id="storeNameFooter">Aurora Digital</span></span>
+        <nav class="footer-links">
+          <button type="button" onclick="openInfo('terms')">Términos</button>
+          <button type="button" onclick="openInfo('privacy')">Privacidad</button>
+          <button type="button" onclick="openInfo('delivery')">Entrega</button>
+        </nav>
+      </div>
+    </footer>
+  </div>
+
+  <div class="modal-layer" id="modalLayer" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h3 id="modalTitle">Información</h3>
+        <button class="close" type="button" onclick="closeModal()" aria-label="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const CONFIG = {
+      tienda: 'Aurora Digital',
+      whatsapp: '528995069576',
+      monedaDefecto: 'MXN'
+    };
+
+    let PRODUCTOS = [];
+    let RESULTADOS = [];
+
+    const $ = (selector) => document.querySelector(selector);
+
+    function money(value){
+      return Number(value || 0).toLocaleString('es-MX', { maximumFractionDigits:2 });
+    }
+
+    function escapeHTML(value){
+      return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+
+    function getRef(product){
+      return product?.idRef ?? product?.id ?? product?.codigo ?? '';
+    }
+
+    /* Nombre del producto: lo toma de productos.json (titulo, nombre, title...).
+       Si no tiene, usa el idRef con formato bonito (ej. "sistema-solar" → "Sistema Solar"). */
+    function getTitle(product){
+      const keys = ['titulo','título','nombre','name','title','producto'];
+      for(const k of keys){
+        const v = product?.[k];
+        if(typeof v === 'string' && v.trim()) return v.trim();
+      }
+      const ref = getRef(product);
+      if(ref !== '') return String(ref).replace(/[-_]+/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+      return 'Producto digital';
+    }
+
+    /* ---------- WhatsApp ----------
+       Cada producto genera un link directo a tu WhatsApp con el pedido escrito. */
+    function whatsappUrl(message){
+      return 'https://wa.me/' + CONFIG.whatsapp + '?text=' + encodeURIComponent(message);
+    }
+
+    function buyMessage(product){
+      const currency = product.moneda || CONFIG.monedaDefecto;
+      const price = Number(product.precio || 0);
+      return 'Hola ' + CONFIG.tienda + ', quiero comprar esta página:\n\n' +
+        '📄 *' + getTitle(product) + '*\n' +
+        (price ? '💰 Precio: $' + money(price) + ' ' + currency + '\n' : '') +
+        '\n¿Me ayudas con el pedido?';
+    }
+
+    function openWhatsApp(message){
+      window.open(whatsappUrl(message),'_blank','noopener,noreferrer');
+    }
+
+    function askWhatsApp(){
+      openWhatsApp('Hola ' + CONFIG.tienda + ', tengo una pregunta sobre sus productos digitales.');
+    }
+
+    /* ---------- Imágenes (se leen de productos.json) ---------- */
+    const IMG_DIR = '';
+    const IMG_EXT = ['png','jpg','jpeg','webp','gif','avif','svg'];
+
+    function getImageHints(product){
+      const ref = getRef(product);
+      const keyRe = /(imagen|imagenes|imágenes|img|imag|image|foto|portada|cover|picture|miniatura|thumb|archivo)/i;
+      const hints = [];
+
+      const add = (v) => {
+        if(Array.isArray(v)) v = v[0];
+        if(v && typeof v === 'object') v = v.url || v.src || v.ruta || v.nombre || '';
+        if(typeof v === 'string' && v.trim()) hints.push(v.trim());
+      };
+
+      if(product && typeof product === 'object'){
+        Object.keys(product).forEach(k => { if(keyRe.test(k)) add(product[k]); });
+      }
+
+      if(ref !== '') hints.push(String(ref));
+      hints.push(getTitle(product));
+      return hints;
+    }
+
+    function imageCandidatesFor(product){
+      const out = [];
+      const enc = (s) => { try{ return encodeURIComponent(decodeURIComponent(s)); }catch(e){ return s; } };
+
+      getImageHints(product).forEach(raw => {
+        const src = raw.replace(/\\/g,'/').replace(/^\.\//,'').replace(/^\/+/,'');
+        if(/^(https?:)?\/\//i.test(src) || src.startsWith('data:')){
+          out.push(src);
+          return;
+        }
+        const name = src.split('/').pop();
+        const hasExt = /\.[a-z0-9]{2,5}$/i.test(name);
+        const names = hasExt ? [name] : IMG_EXT.map(e => name + '.' + e);
+        names.forEach(n => {
+          out.push(IMG_DIR + n);
+          out.push(IMG_DIR + enc(n));
+        });
+      });
+      return [...new Set(out)];
+    }
+
+    function imgTag(product,cls,loading){
+      const title = getTitle(product);
+      const list = imageCandidatesFor(product);
+      const placeholder = '<div class="ph"><i class="fa-regular fa-image"></i></div>';
+      if(!list.length) return placeholder;
+      return placeholder + `<img ${cls ? `class="${cls}"` : ''} src="${escapeHTML(list[0])}" alt="${escapeHTML(title)}" loading="${loading}" data-alts="${escapeHTML(JSON.stringify(list.slice(1)))}" onerror="imgFail(this)">`;
+    }
+
+    function imgFail(el){
+      let alts = [];
+      try{ alts = JSON.parse(el.dataset.alts || '[]'); }catch(e){}
+      if(alts.length){
+        const next = alts.shift();
+        el.dataset.alts = JSON.stringify(alts);
+        el.src = next;
+      }else{
+        el.onerror = null;
+        el.remove();
+      }
+    }
+
+    function showToast(message){
+      const toast = $('#toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    /* ---------- Catálogo ---------- */
+    function renderProducts(list){
+      const catalog = $('#catalog');
+      $('#count').textContent = String(PRODUCTOS.length);
+
+      if(!list.length){
+        catalog.innerHTML = `<div class="empty"><div><strong>No encontramos productos</strong>Prueba con otro nombre o descripción.</div></div>`;
+        return;
+      }
+
+      catalog.innerHTML = list.map((product, index) => {
+        const title = getTitle(product);
+        const description = product.descripcion || 'Producto digital personalizado.';
+        const price = Number(product.precio || 0);
+        const currency = product.moneda || CONFIG.monedaDefecto;
+
+        return `
+          <article class="card">
+            <div class="media">
+              ${imgTag(product, '', index < 4 ? 'eager' : 'lazy')}
+              ${product.tag ? `<span class="tag">${escapeHTML(product.tag)}</span>` : ''}
+            </div>
+            <div class="body">
+              <div class="seller">${escapeHTML(CONFIG.tienda)} · Producto digital</div>
+              <h2 class="title">${escapeHTML(title)}</h2>
+              <p class="desc">${escapeHTML(description)}</p>
+              <div class="price-line">
+                <div class="price">$${money(price)}<small>${escapeHTML(currency)}</small></div>
+                <div class="pay-status">Entrega digital<br>Pedido por WhatsApp</div>
+              </div>
+              <div class="actions">
+                <a class="buy-btn" href="${escapeHTML(whatsappUrl(buyMessage(product)))}" target="_blank" rel="noopener noreferrer">
+                  <i class="fa-brands fa-whatsapp"></i> Comprar por WhatsApp
+                </a>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    async function iniciarTienda() {
+      try {
+        const resProd = await fetch('productos.json', { cache:'no-store' });
+        if(!resProd.ok) throw new Error('No se pudo cargar productos.json');
+        const data = await resProd.json();
+        if(!Array.isArray(data)) throw new Error('productos.json debe contener un arreglo');
+
+        PRODUCTOS = data.filter(item => item && typeof item === 'object');
+        RESULTADOS = [...PRODUCTOS];
+        renderProducts(RESULTADOS);
+      } catch (e) {
+        console.error('Error al cargar la tienda', e);
+        $('#count').textContent = '0';
+        $('#catalog').innerHTML = `<div class="empty"><div><strong>No se pudo cargar tu catálogo</strong>Asegúrate de tener <b>productos.json</b> junto a <b>index.html</b>.</div></div>`;
+      }
+    }
+
+    $('#search').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      RESULTADOS = PRODUCTOS.filter(p =>
+        getTitle(p).toLowerCase().includes(q) ||
+        (p.descripcion && p.descripcion.toLowerCase().includes(q))
+      );
+      renderProducts(RESULTADOS);
+    });
+
+    /* ---------- Información (modales) ---------- */
+    function openInfo(type){
+      const info = {
+        about:{
+          title:'Sobre la tienda',
+          html:`<p><strong>${escapeHTML(CONFIG.tienda)}</strong> es un espacio para ofrecer experiencias y productos digitales personalizados.</p>
+                <p>Elige tu producto y presiona <strong>Comprar por WhatsApp</strong>: se abrirá tu chat con el pedido ya escrito.</p>`
+        },
+        terms:{
+          title:'Términos',
+          html:`<p>Los productos son digitales y se entregan por medios electrónicos.</p>
+                <ul>
+                  <li>Los precios se muestran en pesos mexicanos.</li>
+                  <li>El pedido y el pago se acuerdan por WhatsApp.</li>
+                  <li>Para personalización o dudas puedes escribirnos en cualquier momento.</li>
+                </ul>`
+        },
+        privacy:{
+          title:'Privacidad',
+          html:`<p>Utilizamos los datos que compartes únicamente para atender tu pedido y la comunicación relacionada con tu compra.</p>`
+        },
+        delivery:{
+          title:'Entrega',
+          html:`<p>La entrega es digital y se realiza por medios electrónicos después de confirmar el pedido.</p>
+                <p>Para cualquier problema con tu pedido, puedes comunicarte por WhatsApp.</p>`
+        }
+      };
+
+      const selected = info[type] || info.about;
+      $('#modalTitle').textContent = selected.title;
+      $('#modalBody').innerHTML = selected.html;
+
+      const modal = $('#modalLayer');
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden','false');
+      document.body.classList.add('modal-open');
+    }
+
+    function closeModal(){
+      const modal = $('#modalLayer');
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden','true');
+      document.body.classList.remove('modal-open');
+    }
+
+    $('#modalLayer').addEventListener('click', (e) => { if(e.target === $('#modalLayer')) closeModal(); });
+    window.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeModal(); });
+    window.addEventListener('scroll', () => { $('#header').classList.toggle('scrolled', window.scrollY > 14); }, { passive:true });
+
+    $('#storeName').textContent = CONFIG.tienda;
+    $('#storeNameFooter').textContent = CONFIG.tienda;
+    document.title = CONFIG.tienda;
+    $('#year').textContent = new Date().getFullYear();
+    window.addEventListener('DOMContentLoaded', iniciarTienda);
+  </script>
+</body>
+</html>
